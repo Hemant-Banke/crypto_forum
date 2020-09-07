@@ -1,0 +1,69 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block extra_head %}
+<link rel="preload" href="{% static "css/style-main.css" %}" type="text/css" media="screen" as="style" />
+<link rel="stylesheet" href="{% static "css/style-main.css" %}" type="text/css" media="screen" />
+{% endblock %}
+
+{% block content %}
+    <div class="container container-small mt-4 text-center">
+
+        <img class="lazyload mx-auto display-md mb-3" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
+            data-src="{% static 'img/logo.png' %}" style="height: 100px; width: auto;">
+
+        <div class="card shadow-sm text-left">
+            <div class="card-body">
+                <h4 class="text-center font-weight-bold">LogIn your account</h4>
+
+                <form action="login" method="post" class="needs-validation login-form" novalidate>
+                    {% csrf_token %}
+
+                    {% if messages %}
+                        <div class="alert alert-danger mt-3" role="alert">
+                            {% for message in messages %}
+                                <p class="mb-0 w-100">{{message}}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="uname" class="card-subhead-text">Username</label>
+                        <input type="text" id="uname" class="form-control" name="username" placeholder="Enter username" maxlength="300" required autofocus>
+                        <div class="invalid-feedback">
+                            Type a valid Username
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="card-subhead-text">Password</label>
+                        <input type="password" id="password" class="form-control" name="password" placeholder="Enter Password" maxlength="300" required>
+                        <div class="invalid-feedback">
+                            Type a password
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-main btn-stretch mt-3">
+			            <div class="spinner-border spinner spinner-border-sm text-light" role="status" style="display: none;">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        LogIn
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="text-center mt-3">Already have an account? <a class="text-primary" href="{% url 'users:registration' %}">Register</a></div>
+
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block extra_body %}
+<script async src="{% static "js/tkd_script.js" %}"></script>
+{% endblock %}

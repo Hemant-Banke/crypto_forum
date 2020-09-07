@@ -1,0 +1,755 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block title %}{{platform.name}} | Crypto Scammer{% endblock %}
+
+{% block extra_head %}
+<link rel="preload" href="{% static "css/style-main.css" %}" type="text/css" media="screen" as="style" />
+<link rel="stylesheet" href="{% static "css/style-main.css" %}" type="text/css" media="screen" />
+
+<link rel="preload" href="{% static "css/star-rating.min.css" %}" type="text/css" media="screen" as="style" />
+<link href="{% static "css/star-rating.min.css" %}" rel="stylesheet" />
+{% endblock %}
+
+
+{% block content %}
+<div class="container container-fluid mt-0 shadow-sm bg-white">
+    <div class="container container-large container-platform">
+
+        <div class="pl-img-wrapper">
+            <img class="lazyload pl-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
+                data-src="{{platform.image_url}}" alt="{{platform.name}}">
+        </div>
+
+        <div class="pl-content-wrapper">
+            <h3 class="font-weight-bold">
+                <a target="_blank" href="{{platform.site_url}}" class="text-dark">{{platform.name|title}} <i class="fas fa-link" style="font-size: 1.3rem;"></i></a>
+            </h3>
+
+            <div class="row">
+                <div class="col-sm-6 mb-3">
+                    <label class="card-subhead-text">Our Rating ({{platform.rating}}/5)</label>
+                    <select id="star-our-rating" disabled>
+                        <option value="5" selected>Excellent</option>
+                        <option value="4">Very Good</option>
+                        <option value="3">Average</option>
+                        <option value="2">Poor</option>
+                        <option value="1">Terrible</option>
+                    </select>
+                    <br>
+                    <label class="card-subhead-text">User Reviews ({{users_avg}}/5)</label>
+                    <select id="star-user-rating" disabled>
+                        <option value="5" selected>Excellent</option>
+                        <option value="4">Very Good</option>
+                        <option value="3">Average</option>
+                        <option value="2">Poor</option>
+                        <option value="1">Terrible</option>
+                    </select>
+                </div>
+                <div class="col-sm-6 mb-3">
+
+                    <div class="font-weight-bold">
+                        Reports :
+                    </div>
+                    <table class="table table-sm">
+                        <tbody>
+                            {% for type in Prob_TYPES %}
+                                {% if type.0 > 0 %}
+                                    <tr>
+                                        <td>{{ type.1 }}</td>
+                                        <td>{{ type.2 }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Sub Nav -->
+<div class="container container-fluid mt-0 shadow-sm bg-secondary text-light">
+    <div class="container container-large">
+
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <a class="nav-link active" id="info-tab" data-toggle="tab" href="#info" role="tab" aria-controls="info" aria-selected="true">Information</a>
+            </li>
+            <li class="nav-item" role="presentation">
+                <a class="nav-link" id="user-tab" data-toggle="tab" href="#user" role="tab" aria-controls="user" aria-selected="false">User Reviews</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+<!-- Tabs -->
+<div class="tab-content">
+
+    <!-- Info Tab -->
+    <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+
+        <div class="container pb-4">
+            {% if platform.video_id %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    <h3 class="font-weight-bold">Our Review
+                        <a target="_blank" href="https://www.youtube.com/watch?v={{platform.video_id}}" class="btn btn-secondary"><i class="fas fa-link"></i></a>
+                    </h3>
+
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe title="Our Review" src="https://www.youtube.com/embed/{{platform.video_id}}"
+                            frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h4 class="font-weight-bold">Description
+                    </h4>
+
+                    <div class="text-small">
+                        {{platform.description}}
+                    </div>
+                </div>
+            </div>
+
+            <div id="info-api">
+                <div class="mt-3 w-100 d-flex justify-content-center">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- User Review Tab -->
+    <div class="tab-pane fade" id="user" role="tabpanel" aria-labelledby="user-tab">
+
+        <div class="container pb-4">
+            {% if not user.is_authenticated %}
+                <!-- Login -->
+                <div class="card shadow-sm bg-primary-gradient border-0 mt-4 cursor-pointer">
+                    <a href="{% url 'users:login' %}" class="card-body note-block text-light d-block text-decoration-none">
+                        <h5>Login to add a review</h5>
+
+                        <div class="btn btn-light-main pull-mid-right">
+                            Login
+                        </div>
+                    </a>
+                </div>
+            {% else %}
+                <!-- Add Review -->
+                <div class="card shadow-sm mt-3">
+                    <div class="card-body">
+                        <h3 class="font-weight-bold">Add a review</h3>
+                        <hr>
+
+                        <form action="#" id="form-rev" method="post" enctype="multipart/form-data" novalidate>
+                            {% csrf_token %}
+                            <label for="star-my-rating">Choose a rating</label>
+                            <select id="star-my-rating" required>
+                                <option value="">Select a Rating</option>
+                                <option value="5">Excellent</option>
+                                <option value="4">Very Good</option>
+                                <option value="3">Average</option>
+                                <option value="2">Poor</option>
+                                <option value="1">Terrible</option>
+                            </select>
+
+                            <div class="row mt-3 align-items-center">
+                                <div class="col-md-6 form-group">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="0" id="rev_is_problem">
+                                        <label class="form-check-label" for="rev_is_problem">Are you experiencing any problems with this exchange?</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 form-group" id="form-group-problem" style="display: none;">
+                                    <label for="rev_problem_type" class="form-label mb-0">Problem Type</label>
+                                    <select id="rev_problem_type" class="form-control" required>
+                                        {% for type in Prob_TYPES %}
+                                            <option value="{{ type.0 }}">{{ type.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Select a Problem Type
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-3">
+                                <label for="text-rev" class="form-label">Write your review</label>
+                                <textarea type="text" id="text-rev" class="form-control" name="review" rows="5" maxlength="1000"
+                                    placeholder="Write a good review including its good and bad factors to help everyone"
+                                    required autofocus></textarea>
+                                <div class="invalid-feedback">
+                                    Type a Request
+                                </div>
+                            </div>
+
+                            <div class="form-file my-3">
+                                <input type="file" class="form-file-input" name="review-img" id="review-img">
+                                <label class="form-file-label" for="review-img">
+                                    <span class="form-file-text">Additional Image (Optional)</span>
+                                    <span class="form-file-button">Browse</span>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-main" id="btn-send-rev">
+                                <div class="spinner-border spinner spinner-border-sm text-light" role="status" style="display: none;">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                Post Review
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            {% endif %}
+
+            <div class="card shadow-sm mt-3">
+                <div class="card-body">
+                    <h3 class="font-weight-bold">{{count_revs}} Reviews</h3>
+
+                    {% for type in Prob_TYPES %}
+                        <button class="exc-wrapper btn-filter border w-auto mb-2 mr-1" data-filter="{{ type.0 }}">
+                            {% if type.1 == 'None' %} All {% else %} {{ type.1 }} ({{ type.2 }}) {% endif %}
+                        </button>
+                    {% endfor %}
+
+                    <hr>
+
+                    <!-- Reviews -->
+                    <div id="rev-wrapper" class="rev-wrapper">
+                        <div class="mt-3 w-100 d-flex justify-content-center">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <!-- Pagination -->
+                    <div id="rev-pagination">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_body %}
+<!-- Modal -->
+<div class="modal fade" id="modal-rev" tabindex="-1" aria-labelledby="modalrevLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalrevLabel"></div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pt-0">
+                <div id="modalrevBody"></div>
+
+                <h6 class="font-weight-bold border-bottom mt-3 mb-2">Add Comment</h6>
+                {% if not user.is_authenticated %}
+                    <!-- Login -->
+                    <div class="card shadow-sm bg-primary-gradient border-0 mt-4 cursor-pointer">
+                        <a href="{% url 'users:login' %}" class="card-body note-block text-light d-block text-decoration-none">
+                            <h5>Login to add a comment</h5>
+
+                            <div class="btn btn-light-main pull-mid-right">
+                                Login
+                            </div>
+                        </a>
+                    </div>
+                {% else %}
+                    <form action="#" id="form-add-comment" method="post" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" id="parent-comment" value="0">
+
+                        <div class="form-group mt-3">
+                            <label for="text-comment" class="form-label mb-0">Write your Comment</label>
+                            <textarea type="text" id="text-comment" class="form-control" name="comment" rows="5" maxlength="1000"
+                                placeholder="Write a good comment that helps everyone"
+                                required autofocus></textarea>
+                            <div class="invalid-feedback">
+                                Type a comment
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-main" id="btn-send-comment">
+                            <div class="spinner-border spinner spinner-border-sm text-light" role="status" style="display: none;">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            Post Comment
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+                {% endif %}
+
+                <h6 class="font-weight-bold border-bottom mt-3 mb-2">Comments</h6>
+                <div id="modalrevComments" class="rev-wrapper"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script async src="{% static "js/tkd_script.js" %}"></script>
+<script async src="{% static "js/star-rating.min.js" %}"></script>
+
+
+<script>
+    var problem_types = [
+        {% for type in Prob_TYPES %}
+            "{{ type.1 }}",
+        {% endfor %}
+    ];
+
+
+    window.addEventListener('load', (event) => {
+        document.getElementById('star-our-rating').value = '{{platform.rating}}';
+
+        var users_avg = Math.round({{users_avg}});
+        document.getElementById('star-user-rating').value = users_avg.toString();
+
+        new StarRating('#star-our-rating',{
+            maxStars: 5,
+            clearable: false,
+        });
+
+        new StarRating('#star-user-rating',{
+            maxStars: 5,
+            clearable: false,
+        });
+
+        new StarRating('#star-my-rating',{
+            maxStars: 5,
+            clearable: true,
+        });
+
+
+        {% if user.is_authenticated %}
+        // Toggle Problem Types
+        var elem_is_problem = document.getElementById('rev_is_problem');
+        var elem_problem_type = document.getElementById('form-group-problem');
+        elem_is_problem.addEventListener('change', function(){
+            elem_problem_type.style.display = 'none';
+            if (elem_is_problem.checked){
+                elem_problem_type.style.display = 'block';
+            }
+        });
+
+        // Review Form
+        var form_review = document.getElementById('form-rev');
+        form_review.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (FormValidate.validate(form_review)){
+                var btn = form_review.querySelector('input[type="submit"], button[type="submit"]');
+                console.log(form_review.querySelector('input#review-img').files[0]);
+                Fetch.post_multipart(
+                    '/controller/register_review',
+                    {
+                        review_text: form_review.querySelector('textarea[name="review"]').value,
+                        review_img: form_review.querySelector('input#review-img').files[0],
+                        rating: form_review.querySelector('select#star-my-rating').value,
+                        platform_name: '{{platform.name}}',
+                        review_is_problem: elem_is_problem.checked,
+                        review_problem_type: form_review.querySelector('select#rev_problem_type').value,
+                    },
+                    function(data){
+                        msg.success('Your review has been posted :)', 'Sent');
+                        // Clear
+                        form_review.classList.remove('was-validated');
+                        form_review.reset();
+                        location.reload();
+                    },
+                    btn
+                );
+            }
+        });
+
+
+        // Comments Form
+        var form_comment = document.getElementById('form-add-comment');
+        form_comment.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (FormValidate.validate(form_comment)){
+                var btn = form_comment.querySelector('input[type="submit"], button[type="submit"]');
+                Fetch.post(
+                    '/controller/register_comment',
+                    {
+                        review_text: form_comment.querySelector('textarea[name="comment"]').value,
+                        platform_name: '{{platform.name}}',
+                        review_parent: form_comment.querySelector('#parent-comment').value,
+                    },
+                    function(data){
+                        msg.success('Your comment has been posted :)', 'Sent');
+                        // Clear
+                        form_comment.classList.remove('was-validated');
+                        form_comment.reset();
+                        location.reload();
+                    },
+                    btn
+                );
+            }
+        });
+        {% endif %}
+
+
+        {% if platform.platform_type == 'exchange' %}
+        // Get Exchange information
+        Fetch.get_crossorigin(
+            'https://api.coingecko.com/api/v3/exchanges/{{api_name}}',
+            function(data){
+                document.getElementById('info-api').innerHTML = `
+                    <div class="card shadow-sm mt-3">
+                        <div class="card-body">
+                            <div class="exc-info">
+
+                                <div class="exc-info-head">
+                                    <div class="exc-info-img">
+                                        <img class="lazyload" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
+                                            data-src="${data.image}" alt="${data.name}">
+                                    </div>
+                                    <a target="_blank" href="${data.url}" class="h4 text-dark mb-0">${data.name} <i class="fas fa-link" style="font-size: 1rem;"></i></a>
+                                    ${(data.year_established)
+                                        ? `<div class="text-dark"><i class="far fa-calendar"></i> ${data.year_established}</div>`
+                                        : ''}
+
+                                    ${(data.country)
+                                        ? `<div class="text-dark"><i class="fas fa-map-marker-alt"></i> ${data.country}</div>`
+                                        : ''}
+
+                                </div>
+
+                                <div class="exc-social">
+                                    ${(data.facebook_url)
+                                        ? `<a target="_blank" href="${data.facebook_url}" title="Facebook" class="exc-social-elm" style="color:#3B5998;"><i class="fab fa-facebook-square"></i></a>`
+                                        : ''}
+
+                                    ${(data.reddit_url)
+                                        ? `<a target="_blank" href="${data.reddit_url}" title="Reddit" class="exc-social-elm" style="color:#FF4301;"><i class="fab fa-reddit-square"></i></a>`
+                                        : ''}
+
+                                    ${(data.telegram_url)
+                                        ? `<a target="_blank" href="${data.telegram_url}" title="Telegram" class="exc-social-elm" style="color:#0088CC;"><i class="fab fa-telegram"></i></a>`
+                                        : ''}
+
+                                    ${(data.slack_url)
+                                        ? `<a target="_blank" href="${data.slack_url}" title="Slack" class="exc-social-elm" style="color:#CF0E5B;"><i class="fab fa-slack"></i></a>`
+                                        : ''}
+
+                                    ${(data.twitter_handle)
+                                        ? `<a target="_blank" href="https://twitter.com/${data.twitter_handle}" title="Twitter" class="exc-social-elm" style="color:#00ACEE;"><i class="fab fa-twitter-square"></i></a>`
+                                        : ''}
+                                </div>
+
+                                ${(data.description)
+                                    ? `<div class="exc-info-desc mb-3">
+                                            <div class="text-small">${data.description}</div>
+                                        </div>`
+                                    : ''}
+
+                                <table class="exc-info-tabl table">
+                                    <tbody>
+                                        ${(data.trust_score)
+                                            ? `<tr>
+                                                    <td>Trust Score</td><td>${data.trust_score}</td>
+                                                </tr>`
+                                            : ''}
+
+                                        ${(data.trust_score_rank)
+                                            ? `<tr>
+                                                    <td>Trust Rank</td><td>${data.trust_score_rank}</td>
+                                                </tr>`
+                                            : ''}
+
+                                        ${(data.trade_volume_24h_btc)
+                                            ? `<tr>
+                                                    <td>BTC Volume(24h)</td><td>${data.trade_volume_24h_btc}</td>
+                                                </tr>`
+                                            : ''}
+
+                                        ${(data.trade_volume_24h_btc_normalized)
+                                            ? `<tr>
+                                                    <td>BTC Volume(24h) Normalized</td><td>${data.trade_volume_24h_btc_normalized}</td>
+                                                </tr>`
+                                            : ''}
+
+                                    </tbody>
+                                </table>
+
+                                <small><a href='https://www.coingecko.com/en/api#explore-api' class="text-dark" target="_blank">(Source : CoinGecko)</a></small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        );
+
+        {% elif  platform.platform_type == 'coin' %}
+        // Get Exchange information
+        Fetch.get_crossorigin(
+            'https://api.coingecko.com/api/v3/coins/{{api_name}}',
+            function(data){
+                document.getElementById('info-api').innerHTML = `
+                    <div class="card shadow-sm mt-3">
+                        <div class="card-body">
+                            <div class="exc-info">
+
+                                <div class="exc-info-head">
+                                    <div class="exc-info-img">
+                                        <img class="lazyload" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
+                                            data-src="${data.image.small}" alt="${data.name}">
+                                    </div>
+                                    <a target="_blank" href="${data.links.homepage[0]}" class="h4 text-dark mb-0">${data.name} <i class="fas fa-link" style="font-size: 1rem;"></i></a>
+                                    ${(data.symbol)
+                                        ? `<div class="text-dark"><i class="fas fa-flag"></i> ${data.symbol.toUpperCase()}</div>`
+                                        : ''}
+
+                                    ${(data.genesis_date)
+                                        ? `<div class="text-dark"><i class="far fa-calendar"></i> ${data.genesis_date}</div>`
+                                        : ''}
+
+                                    ${(data.country_origin)
+                                        ? `<div class="text-dark"><i class="fas fa-map-marker-alt"></i> ${data.country_origin}</div>`
+                                        : ''}
+
+                                </div>
+
+                                <div class="exc-social">
+                                    ${(data.links.facebook_username)
+                                        ? `<a target="_blank" href="https://www.facebook.com/${data.links.facebook_username}" title="Facebook" class="exc-social-elm" style="color:#3B5998;"><i class="fab fa-facebook-square"></i></a>`
+                                        : ''}
+
+                                    ${(data.links.subreddit_url)
+                                        ? `<a target="_blank" href="${data.links.subreddit_url}" title="Reddit" class="exc-social-elm" style="color:#FF4301;"><i class="fab fa-reddit-square"></i></a>`
+                                        : ''}
+
+                                    ${(data.links.telegram_channel_identifier)
+                                        ? `<a target="_blank" href="https://www.telegram.com/${data.links.telegram_channel_identifier}" title="Telegram" class="exc-social-elm" style="color:#0088CC;"><i class="fab fa-telegram"></i></a>`
+                                        : ''}
+
+                                    ${(data.links.twitter_screen_name)
+                                        ? `<a target="_blank" href="https://twitter.com/${data.links.twitter_screen_name}" title="Twitter" class="exc-social-elm" style="color:#00ACEE;"><i class="fab fa-twitter-square"></i></a>`
+                                        : ''}
+
+                                    ${(data.links.repos_url.github)
+                                        ? `<a target="_blank" href="${data.links.repos_url.github[0]}" title="Github" class="exc-social-elm" style="color:#211F1F;"><i class="fab fa-github-square"></i></a>`
+                                        : ''}
+                                </div>
+
+                                ${(data.description.en)
+                                    ? `<div class="exc-info-desc mb-3">
+                                            <div class="text-small">${data.description.en}</div>
+                                        </div>`
+                                    : ''}
+
+                                <table class="exc-info-tabl table">
+                                    <tbody>
+                                        ${(data.community_score)
+                                            ? `<tr>
+                                                    <td>Community Score</td><td>${data.community_score} /100</td>
+                                                </tr>`
+                                            : ''}
+
+                                        ${(data.market_cap_rank)
+                                            ? `<tr>
+                                                    <td>Market Cap Rank</td><td>${data.market_cap_rank}</td>
+                                                </tr>`
+                                            : ''}
+
+                                        ${(data.market_data.price_change_percentage_24h)
+                                            ? `<tr>
+                                                    <td>Price Change(24h)</td><td>${data.market_data.price_change_percentage_24h} %</td>
+                                                </tr>`
+                                            : ''}
+
+                                        ${(data.market_data.market_cap_change_percentage_24h)
+                                            ? `<tr>
+                                                    <td>Market Cap Change(24h)</td><td>${data.market_data.market_cap_change_percentage_24h} %</td>
+                                                </tr>`
+                                            : ''}
+
+                                    </tbody>
+                                </table>
+
+                                <small><a href='https://www.coingecko.com/en/api#explore-api' class="text-dark" target="_blank">(Source : CoinGecko)</a></small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        );
+
+        {% endif %}
+
+
+        var filter_active = 0;
+        var btn_filters = document.querySelectorAll('.btn-filter');
+
+        // Load Recent Reviews
+        request = function request(page = 0){
+            page = Math.abs(page);
+            Fetch.post(
+                '/controller/get_reviews/{{platform.name}}/'+ filter_active +'/'+page,
+                {},
+                function(data){
+                    var dataHTML = '';
+                    revs = JSON.parse(data.data);
+                    revs.forEach((rev) => {
+                        dataHTML += `
+                            <div class="rev-elem" data-rev="${rev.id}" data-comments="${rev.comments_count}">
+                                <div class="navbar-profile">
+                                    <div class="profile-icon mr-3">
+                                        <img class="lazyload" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
+                                            data-src="{% static "img/user.png" %}" alt="User Icon">
+                                    </div>
+
+                                    <div class="profile-name text-left">
+                                        <span>${sanitizeHTML(rev.name)}</span>
+
+                                        <select class="star-rev-rating" disabled>
+                                            <option value="5" ${(rev.rating == 5) ? 'selected' : ''}>Excellent</option>
+                                            <option value="4" ${(rev.rating == 4) ? 'selected' : ''}>Very Good</option>
+                                            <option value="3" ${(rev.rating == 3) ? 'selected' : ''}>Average</option>
+                                            <option value="2" ${(rev.rating == 2) ? 'selected' : ''}>Poor</option>
+                                            <option value="1" ${(rev.rating == 1) ? 'selected' : ''}>Terrible</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                <div class="rev-modal">
+                                    ${(rev.is_problem && !rev.is_problem_resolved) ?
+                                    '<div class="font-weight-bold text-danger">' + problem_types[rev.problem_type] + '</div>' : ''}
+
+                                    ${(rev.image_url && rev.image_url != '/media/False') ? `
+                                        <div class="image-wrapper mb-3">
+                                            <img class="lazyload w-100 h-100" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
+                                                data-src="${rev.image_url}" alt="Review Image">
+                                        </div>
+                                    ` : ''}
+
+                                    <div class="rev-text three-lines text-small">
+                                        ${sanitizeHTML(rev.review)}
+                                    </div>
+                                    <small class="mr-3">Posted on ${rev.createdon.slice(0,16)}</small>
+                                    <small class="btn-link text-dark">${rev.comments_count} Comments</small>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('rev-wrapper').innerHTML = dataHTML;
+
+                    new StarRating('.star-rev-rating',{
+                        maxStars: 5,
+                        clearable: false,
+                        showText: false,
+                    });
+
+                    Pagination.create(
+                        data.page_count,
+                        page,
+                        document.getElementById('rev-pagination'),
+                        'request'
+                    );
+
+                    // Review Modal
+                    var rev_elems = document.getElementsByClassName('rev-elem');
+                    Array.prototype.slice.call(rev_elems).forEach((elem) => {
+                        elem.addEventListener('click', function(){
+                            document.getElementById('modalrevLabel').innerHTML = elem.querySelector('.navbar-profile').outerHTML;
+                            document.getElementById('modalrevBody').innerHTML = elem.querySelector('.rev-modal').outerHTML;
+
+                            document.getElementById('modalrevBody').querySelector('.rev-text').classList.remove('three-lines');
+
+                            var cmnt_body = document.getElementById('modalrevComments');
+                            if (parseInt(elem.getAttribute("data-comments")) > 0){
+                                // Load Comments
+                                cmnt_body.innerHTML = '';
+                                Fetch.post(
+                                    '/controller/get_comments/'+elem.getAttribute("data-rev"),
+                                    {},
+                                    function(data){
+                                        revs = JSON.parse(data.data);
+                                        revs.forEach((rev) => {
+                                            var rev_elem = document.createElement('div');
+                                            rev_elem.setAttribute('class', 'rev-elem');
+                                            rev_elem.innerHTML += `
+                                                <div class="navbar-profile">
+                                                    <div class="profile-icon mr-3">
+                                                        <img class="lazyload" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
+                                                            data-src="{% static "img/user.png" %}" alt="User Icon">
+                                                    </div>
+
+                                                    <div class="profile-name text-left">
+                                                        <span>${sanitizeHTML(rev.name)}</span>
+                                                    </div>
+                                                </div>
+
+                                                <hr>
+
+                                                <div class="rev-modal">
+                                                    <div class="rev-text text-small">
+                                                        ${sanitizeHTML(rev.review)}
+                                                    </div>
+                                                    <small class="mr-3">Posted on ${rev.createdon.slice(0,16)}</small>
+                                                </div>
+                                            `;
+
+                                            cmnt_body.appendChild(rev_elem);
+                                        });
+                                    }
+                                );
+                            }
+                            else{
+                                cmnt_body.innerHTML = 'No Comments made!';
+                            }
+
+                            // Parent Id
+                            if (document.getElementById('parent-comment')){
+                                document.getElementById('parent-comment').value = elem.getAttribute("data-rev");
+                            }
+
+                            var modal = new bootstrap.Modal(document.getElementById('modal-rev'));
+                            modal.show();
+                        });
+                    });
+
+                }
+            );
+        }
+
+        request();
+
+        for (var i=0; i < btn_filters.length; i++){
+            btn_filters[i].addEventListener('click', function(){
+                filter_active = parseInt(this.getAttribute('data-filter'));
+                request();
+            });
+        }
+
+    });
+</script>
+{% endblock %}

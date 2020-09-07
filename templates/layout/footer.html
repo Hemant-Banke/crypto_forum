@@ -1,0 +1,95 @@
+
+<!-- Donate Modal -->
+<div class="modal fade" id="modal-donate" tabindex="-1" aria-labelledby="modaldonateLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modaldonateLabel">Support the platform</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pt-0">
+
+                <h4>Our Address</h4>
+
+                <div class="table-responsive">
+                    <table class="table" id="table-donate">
+                        <thead>
+                            <tr>
+                                <th>Address</th>
+                                <th>Coin</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function copyTextToClipboard_Modal(text){
+        var textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.querySelector('#modal-donate').appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            var successful = document.execCommand('copy');
+            if (successful){
+                msg.success('', 'Copied');
+            }
+            else{
+                msg.error('', 'Not Copied');
+            }
+        }
+        catch (err) {
+            msg.error('Oops, unable to copy', 'Error');
+        }
+
+        document.querySelector('#modal-donate').removeChild(textArea);
+    }
+
+    var addresses = [
+        ['3JVLj7DgqjvqAeRiV2SmWT2qgtiTRAiwUr', 'BTC BITCOIN'],
+
+        ['TWf9UrM2TpHSTHnE76fY769qvFB2KmDQkC', 'USDT THETER TRC20 TRON'],
+
+        ['0xe609a705B15Ec6FEda9f294F7368A5717617a61d', 'USDT THETER ERC20'],
+
+        ['0xf16B5c461345b7D70649EEf6710E498b312B3A99', 'ETH ETHEREUM'],
+
+        ['rPFXvVo2fYXVPdV9gCHQouHsMgMhQ2aUwM', '2471945321 (MEMO) - XRP RIPPLE'],
+    ];
+
+    var dbody = document.getElementById('table-donate').querySelector('tbody');
+
+    addresses.forEach(function(address){
+        var tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <span class="search-res-text d-flex  align-items-center">
+                    <p class="text-truncate mr-1 mb-0">${address[0]}</p>
+                    <button class="btn btn-light-main btn-sm" title="Copy to Clipboard"
+                        onclick="copyTextToClipboard_Modal('${address[0]}')"><i class="far fa-copy"></i></button>
+                </span>
+            </td>
+            <td>
+                <span class="search-res-text d-flex  align-items-center">
+                    <p class="text-truncate mr-1 mb-0">${address[1]}</p>
+                    <button class="btn btn-light-main btn-sm" title="Copy to Clipboard"
+                        onclick="copyTextToClipboard_Modal('${address[1]}')"><i class="far fa-copy"></i></button>
+                </span>
+            </td>
+        `;
+
+        dbody.appendChild(tr);
+    });
+
+</script>

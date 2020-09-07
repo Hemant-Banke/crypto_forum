@@ -1,0 +1,220 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block title %}{{filter}} | Crypto Scammer{% endblock %}
+
+{% block extra_head %}
+<link rel="preload" href="{% static "css/style-main.css" %}" type="text/css" media="screen" as="style" />
+<link rel="stylesheet" href="{% static "css/style-main.css" %}" type="text/css" media="screen" />
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container container-large container-main">
+    <div class="row m-0">
+
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+
+                    <!-- Support -->
+                    <div class="card shadow-sm bg-main-gradient border-0 mb-3 display-mobile"
+                        data-toggle="modal" data-target="#modal-donate">
+                        <div class="card-body note-block position-relative">
+                            <h5>Support the platform</h5>
+
+                            <div class="btn btn-light-main btn-sm pull-mid-right">
+                                Donate
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Request More -->
+                    <div class="card shadow-sm bg-primary-gradient border-0 mb-3 display-mobile"
+                        data-toggle="modal" data-target="#modal-req">
+                        <div class="card-body note-block position-relative">
+                            <h5>Request a Review</h5>
+
+                            <button class="btn btn-light-main btn-sm pull-mid-right">
+                                <i class="fas fa-link"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent -->
+                    {% if filter == 'all' %}
+                    <h3 class="font-weight-bold">All</h3>
+                    {% else %}
+                    <h3 class="font-weight-bold">All {{filter|title}}</h3>
+                    {% endif %}
+                    <hr>
+
+                    <!-- Filtered exc -->
+                    <div id="main-filter">
+                        <div class="mt-3 w-100 d-flex justify-content-center">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+
+                    <!-- Pagination -->
+                    <div id="main-pagination">
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 display-md" style="position: relative;">
+            <!-- Support -->
+            <div class="card shadow-sm bg-main-gradient border-0 mb-3 cursor-pointer"
+                data-toggle="modal" data-target="#modal-donate">
+                <div class="card-body text-light">
+                    <h5>Support the platform</h5>
+
+                    <div class="btn btn-light-main btn-stretch">
+                        Donate
+                    </div>
+                </div>
+            </div>
+
+            <!-- Request More -->
+            <div class="card shadow-sm bg-primary-gradient border-0 mt-4 cursor-pointer"
+                data-toggle="modal" data-target="#modal-req">
+
+                <div class="card-body text-light">
+                    <h5>Request a Review</h5>
+                    <p>Let us know what exchanges, coins or platforms you want to be reviewed.</p>
+
+                    <div class="btn btn-light-main btn-stretch">
+                        Talk with us
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_body %}
+<!-- Modal -->
+<div class="modal fade" id="modal-req" tabindex="-1" aria-labelledby="modalreqLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalreqLabel">Send Request</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pt-0">
+                <form action="#" method="post" id="form-req" novalidate>
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="text-req" class="form-label">Your Request</label>
+                        <textarea type="text" id="text-req" class="form-control" name="request" rows="5" maxlength="1000"
+                            placeholder="Mention the platform you want to be reviewed" required autofocus></textarea>
+                        <div class="invalid-feedback">
+                            Type a Request
+                        </div>
+                    </div>
+
+                    {% if not user.is_authenticated %}
+                    <!-- Login -->
+                    <div class="card shadow-sm bg-primary-gradient border-0 mt-4 cursor-pointer">
+                        <a href="{% url 'users:login' %}" class="card-body note-block text-light d-block text-decoration-none">
+                            <h5>Login to make a request</h5>
+
+                            <div class="btn btn-light-main pull-mid-right">
+                                Login
+                            </div>
+                        </a>
+                    </div>
+                    {% else %}
+                    <button type="submit" class="btn btn-primary btn-main btn-stretch" id="btn-send-req">
+                        <div class="spinner-border spinner spinner-border-sm text-light" role="status" style="display: none;">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        Send Request
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script async src="{% static "js/tkd_script.js" %}"></script>
+
+<script>
+    var request;
+    window.addEventListener('load', (event) => {
+        // Request Form
+        var form_request = document.getElementById('form-req');
+        form_request.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (FormValidate.validate(form_request)){
+                var btn = form_request.querySelector('input[type="submit"], button[type="submit"]');
+
+                Fetch.post(
+                    'controller/register_requests',
+                    {
+                        request_text: form_request.querySelector('textarea[name="request"]').value,
+                    },
+                    function(data){
+                        msg.success('Your request has been received and will be acted upon shortly :)', 'Sent');
+                        // Clear
+                        form_request.classList.remove('was-validated');
+                        form_request.querySelector('textarea[name="request"]').value = '';
+                    },
+                    btn
+                );
+            }
+        });
+
+
+        // Load Recent Reviews
+        request = function request(page = 0){
+            page = Math.abs(page);
+            Fetch.post(
+                '/controller/get_filter/{{filter}}/'+page,
+                {},
+                function(data){
+                    var dataHTML = '';
+                    excs = JSON.parse(data.data);
+                    excs.forEach((exc) => {
+                        dataHTML += `
+                            <a href="/platform/${exc.fields.name}" class="exc-wrapper">
+                                <img class="lazyload exc-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
+                                    data-src="${exc.fields.image_url}" alt="Request">
+
+                                <span class="exc-text">${exc.fields.name}</span>
+                            </a>
+                        `;
+                    });
+                    document.getElementById('main-filter').innerHTML = dataHTML;
+
+                    Pagination.create(
+                        data.page_count,
+                        page,
+                        document.getElementById('main-pagination'),
+                        'request'
+                    );
+                }
+            );
+        }
+
+        request();
+
+    });
+</script>
+{% endblock %}

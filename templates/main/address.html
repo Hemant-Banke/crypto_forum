@@ -1,0 +1,482 @@
+{% extends "layout/base.html" %}
+{% load static %}
+
+{% block title %}Your addresses | Crypto Scammer{% endblock %}
+
+{% block extra_head %}
+<link rel="preload" href="{% static "css/style-main.css" %}" type="text/css" media="screen" as="style" />
+<link rel="stylesheet" href="{% static "css/style-main.css" %}" type="text/css" media="screen" />
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container container-large container-main">
+    <div class="row m-0">
+
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0">
+                <div class="card-body pb-4">
+
+                    <!-- Support -->
+                    <div class="card shadow-sm bg-main-gradient border-0 mb-3 display-mobile"
+                        data-toggle="modal" data-target="#modal-donate">
+                        <div class="card-body note-block position-relative">
+                            <h5>Support the platform</h5>
+
+                            <div class="btn btn-light-main btn-sm pull-mid-right">
+                                Donate
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Request More -->
+                    <div class="card shadow-sm bg-primary-gradient border-0 mb-3 display-mobile"
+                        data-toggle="modal" data-target="#modal-req">
+                        <div class="card-body note-block position-relative">
+                            <h5>Request a Review</h5>
+
+                            <button class="btn btn-light-main btn-sm pull-mid-right">
+                                <i class="fas fa-link"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <h3 class="font-weight-bold">Your Addresses
+                        <button data-toggle="modal" data-target="#modal-add" class="btn btn-primary">Add New <i class="fas fa-plus"></i></button>
+                    </h3>
+                    <hr>
+
+                    <!-- Last Saved -->
+                    <h4>Last Saved</h4>
+                    <div id="last-saved">
+                        <div class="mt-3 w-100 d-flex justify-content-center">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- All Saved -->
+                    <h4>All Saves</h4>
+                    <div id="all-saved">
+                        <div class="mt-3 w-100 d-flex justify-content-center">
+                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 display-md" style="position: relative;">
+            <!-- Support -->
+            <div class="card shadow-sm bg-main-gradient border-0 mb-3 cursor-pointer"
+                data-toggle="modal" data-target="#modal-donate">
+                <div class="card-body text-light">
+                    <h5>Support the platform</h5>
+
+                    <div class="btn btn-light-main btn-stretch">
+                        Donate
+                    </div>
+                </div>
+            </div>
+
+            <!-- Request More -->
+            <div class="card shadow-sm bg-primary-gradient border-0 mt-4 cursor-pointer"
+                data-toggle="modal" data-target="#modal-req">
+
+                <div class="card-body text-light">
+                    <h5>Request a Review</h5>
+                    <p>Let us know what exchanges, coins or platforms you want to be reviewed.</p>
+
+                    <div class="btn btn-light-main btn-stretch">
+                        Talk with us
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_body %}
+<!-- Modal -->
+<div class="modal fade" id="modal-req" tabindex="-1" aria-labelledby="modalreqLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalreqLabel">Send Request</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pt-0">
+                <form action="#" method="post" id="form-req" novalidate>
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="text-req" class="form-label">Your Request</label>
+                        <textarea type="text" id="text-req" class="form-control" name="request" rows="5" maxlength="1000"
+                            placeholder="Mention the platform you want to be reviewed" required autofocus></textarea>
+                        <div class="invalid-feedback">
+                            Type a Request
+                        </div>
+                    </div>
+
+                    {% if not user.is_authenticated %}
+                    <!-- Login -->
+                    <div class="card shadow-sm bg-primary-gradient border-0 mt-4 cursor-pointer">
+                        <a href="{% url 'users:login' %}" class="card-body note-block text-light d-block text-decoration-none">
+                            <h5>Login to make a request</h5>
+
+                            <div class="btn btn-light-main pull-mid-right">
+                                Login
+                            </div>
+                        </a>
+                    </div>
+                    {% else %}
+                    <button type="submit" class="btn btn-primary btn-main btn-stretch" id="btn-send-req">
+                        <div class="spinner-border spinner spinner-border-sm text-light" role="status" style="display: none;">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        Send Request
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Save Modal -->
+<div class="modal fade" id="modal-save" tabindex="-1" aria-labelledby="modalsaveLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalsaveLabel">Coin</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pt-0">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="modal-add" tabindex="-1" aria-labelledby="modaladdLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modaladdLabel">Add Address</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body pt-0">
+                <form action="#" method="post" id="form-add" novalidate>
+                    {% csrf_token %}
+
+
+                    <div class="row m-0">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="text-coin" class="form-label">Coin</label>
+                                <input type="text" id="text-coin" class="form-control" name="add_coin" maxlength="300"
+                                    placeholder="Type coin name" required autofocus />
+                                <div class="invalid-feedback">
+                                    Mention the Coin name
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="text-exchange" class="form-label">Exchange</label>
+                                <input type="text" id="text-exchange" class="form-control" name="add_exchange" maxlength="300"
+                                    placeholder="Type Exchange name" required />
+                                <div class="invalid-feedback">
+                                    Mention the Exchange name
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="text-network_type" class="form-label">Network Type</label>
+                                <input type="text" id="text-network_type" class="form-control" name="add_network_type" maxlength="300"
+                                    placeholder="Type Network Type" required />
+                                <div class="invalid-feedback">
+                                    Mention the network type
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="text-address" class="form-label">Address</label>
+                                <input type="text" id="text-address" class="form-control" name="add_address" maxlength="1000"
+                                    placeholder="Type the Address" required />
+                                <div class="invalid-feedback">
+                                    Mention the address
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    {% if not user.is_authenticated %}
+                    <!-- Login -->
+                    <div class="card shadow-sm bg-primary-gradient border-0 mt-4 cursor-pointer">
+                        <a href="{% url 'users:login' %}" class="card-body note-block text-light d-block text-decoration-none">
+                            <h5>Login to add address</h5>
+
+                            <div class="btn btn-light-main pull-mid-right">
+                                Login
+                            </div>
+                        </a>
+                    </div>
+                    {% else %}
+                    <button type="submit" class="btn btn-primary btn-main btn-stretch" id="btn-add">
+                        <div class="spinner-border spinner spinner-border-sm text-light" role="status" style="display: none;">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        Add Address
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script async src="{% static "js/tkd_script.js" %}"></script>
+
+<script>
+    var request;
+    var delAddress;
+
+
+    window.addEventListener('load', (event) => {
+        // Request Form
+        var form_request = document.getElementById('form-req');
+        form_request.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (FormValidate.validate(form_request)){
+                var btn = form_request.querySelector('input[type="submit"], button[type="submit"]');
+
+                Fetch.post(
+                    'controller/register_requests',
+                    {
+                        request_text: form_request.querySelector('textarea[name="request"]').value,
+                    },
+                    function(data){
+                        msg.success('Your request has been received and will be acted upon shortly :)', 'Sent');
+                        // Clear
+                        form_request.classList.remove('was-validated');
+                        form_request.querySelector('textarea[name="request"]').value = '';
+                    },
+                    btn
+                );
+            }
+        });
+
+
+        // Last Saved
+        Fetch.post(
+            '/controller/get_last_saved',
+            {},
+            function(data){
+                var dataHTML = '';
+                saves = JSON.parse(data.data);
+                saves.forEach((save) => {
+                    dataHTML += `
+                        <div class="search-res-element row m-0">
+                            <div class="col-4 col-md-2">
+                                <span class="search-res-text text-truncate">${sanitizeHTML(save.fields.coin)}</span>
+                            </div>
+                            <div class="col-4 col-md-2">
+                                <span class="search-res-text text-truncate">${sanitizeHTML(save.fields.exchange)}</span>
+                            </div>
+                            <div class="col-4 col-md-2">
+                                <span class="search-res-text text-truncate">${sanitizeHTML(save.fields.network_type)}</span>
+                            </div>
+                            <div class="col-md-6">
+                                <span class="search-res-text d-flex  align-items-center">
+                                    <p class="text-truncate m-0" style="width: 200px;">${sanitizeHTML(save.fields.address)}</p>
+                                    <button class="btn btn-light-main btn-sm" onclick="copyTextToClipboard('${sanitizeHTML(save.fields.address)}')"><i class="far fa-copy"></i></button>
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (dataHTML == ''){
+                    dataHTML = `
+                        <div class="w-100 d-flex justify-content-center">
+                            <h6 class="text-small py-2">Nothing Found :(</h6>
+                        </div>
+                    `;
+                }
+                document.getElementById('last-saved').innerHTML = `
+                    <div class="search-res-element search-head-element row m-0">
+                        <div class="col-4 col-md-2 text-dark font-weight-bold">Coin</div>
+                        <div class="col-4 col-md-2 text-dark font-weight-bold">Exchange</div>
+                        <div class="col-4 col-md-2 text-dark font-weight-bold">Network Type</div>
+                        <div class="col-md-6 text-dark font-weight-bold">Address</div>
+                    </div>` + dataHTML;
+            }
+        );
+
+
+        // All Saved
+        Fetch.post(
+            '/controller/get_all_saved_coins',
+            {},
+            function(data){
+                var dataHTML = '';
+                saves = JSON.parse(data.data);
+                saves.forEach((save) => {
+                    dataHTML += `
+                    <div class="exc-wrapper cursor-pointer btn-saved-coin border" data-coin="${sanitizeHTML(save.fields.coin)}">
+                        <span class="exc-text">${sanitizeHTML(save.fields.coin)}</span>
+                    </div>
+                `;
+                });
+
+                if (dataHTML == ''){
+                    dataHTML = `
+                        <div class="w-100 d-flex justify-content-center">
+                            <h6 class="text-small py-2">Nothing Found :(</h6>
+                        </div>
+                    `;
+                }
+                document.getElementById('all-saved').innerHTML = dataHTML;
+
+                // Add Modal Event Listeners
+                var coins = document.getElementsByClassName('btn-saved-coin');
+                Array.prototype.slice.call(coins).forEach((coin) => {
+                    coin.addEventListener('click', (e) => {
+                        var coin_name = coin.getAttribute('data-coin');
+
+                        var modal_saved = new bootstrap.Modal(document.getElementById('modal-save'));
+                        modal_saved.show();
+                        fetch_saved(coin_name);
+                    });
+                });
+            }
+        );
+
+        // Fetch saved for a coin
+        function fetch_saved(coin_name){
+            // Saved Addresses
+            document.getElementById('modalsaveLabel').innerHTML = coin_name;
+
+            Fetch.post(
+                '/controller/get_coin_saved',
+                {
+                    'coin' : coin_name,
+                },
+                function(data){
+                    var dataHTML = '';
+                    saves = JSON.parse(data.data);
+                    saves.forEach((save) => {
+                        dataHTML += `
+                            <div class="search-res-element row m-0">
+                                <div class="col-md-2 col-6">
+                                    <span class="search-res-text text-truncate">${sanitizeHTML(save.fields.exchange)}</span>
+                                </div>
+                                <div class="col-md-2 col-6">
+                                    <span class="search-res-text text-truncate">${sanitizeHTML(save.fields.network_type)}</span>
+                                </div>
+                                <div class="col-md-8">
+                                    <span class="search-res-text d-flex align-items-center">
+                                        <p class="text-truncate m-0" style="width: 200px">${sanitizeHTML(save.fields.address)}</p>
+                                        <button class="btn btn-light-main btn-sm" onclick="copyTextToClipboard('${sanitizeHTML(save.fields.address)}')"><i class="far fa-copy"></i></button>
+                                        <button class="btn btn-danger btn-sm" onclick="delAddress('${save.fields.address}', '${save.pk}')"><i class="far fa-trash-alt"></i></button>
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    if (dataHTML == ''){
+                        dataHTML = `
+                            <div class="w-100 d-flex justify-content-center">
+                                <h6 class="text-small py-2">Nothing Found :(</h6>
+                            </div>
+                        `;
+                    }
+                    document.querySelector('#modal-save .modal-body').innerHTML = `
+                        <div class="search-res-element search-head-element row m-0">
+                            <div class="col-md-2 col-6 text-dark font-weight-bold">Exchange</div>
+                            <div class="col-md-2 col-6 text-dark font-weight-bold">Network Type</div>
+                            <div class="col-md-8 text-dark font-weight-bold">Address</div>
+                        </div>` + dataHTML;
+                }
+            );
+        }
+
+
+        // Add Form
+        var form_add = document.getElementById('form-add');
+        form_add.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (FormValidate.validate(form_add)){
+                var btn = form_add.querySelector('input[type="submit"], button[type="submit"]');
+
+                Fetch.post(
+                    'controller/register_address',
+                    {
+                        coin: form_add.querySelector('input[name="add_coin"]').value,
+                        exchange: form_add.querySelector('input[name="add_exchange"]').value,
+                        network_type: form_add.querySelector('input[name="add_network_type"]').value,
+                        address: form_add.querySelector('input[name="add_address"]').value,
+                        is_new: true,
+                    },
+                    function(data){
+                        msg.success('Your address has been saved. Now you can access/copy it easily :)', 'Saved');
+                        // Clear
+                        form_add.classList.remove('was-validated');
+                        form_add.reset();
+                        location.reload();
+                    },
+                    btn
+                );
+            }
+        });
+
+
+        // Delete Address
+        delAddress = function(address, pk){
+            Fetch.post(
+                '/controller/del_address',
+                {
+                    'address' : address,
+                    'pk' : pk,
+                },
+                function(data){
+                    msg.success('The address has been deleted', 'Success');
+                    location.reload();
+                }
+            );
+        }
+
+    });
+</script>
+{% endblock %}

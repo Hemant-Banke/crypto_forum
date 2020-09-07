@@ -1,0 +1,106 @@
+{% extends 'layout/base.html' %}
+{% load static %}
+
+{% block title %}
+Registration
+{% endblock %}
+
+{% block extra_head %}
+<link rel="preload" href="{% static "css/style-main.css" %}" type="text/css" media="screen" as="style" />
+<link rel="stylesheet" href="{% static "css/style-main.css" %}" type="text/css" media="screen" />
+{% endblock %}
+
+{% block content %}
+
+    <div class="container container-small mt-4 text-center">
+        <img class="lazyload mx-auto display-md mb-3" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII="
+            data-src="{% static 'img/logo.png' %}" style="height: 100px; width: auto;">
+
+        <div class="card shadow-sm text-left">
+            <div class="card-body">
+
+                <h4 class="text-center font-weight-bold">Register new account</h4>
+
+                <form action="registration" method="post" class="needs-validation login-form" novalidate>
+                    {% csrf_token %}
+
+                    {% if messages %}
+                        <div class="alert alert-danger mt-3" role="alert">
+                            {% for message in messages %}
+                                <p class="mb-0 w-100">{{message}}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="username" class="card-subhead-text">Username</label>
+                        <input type="text" class="form-control" name="username" id ="username" placeholder="Username" maxlength="300" value="{{uname}}" required autofocus>
+                        <div class="invalid-feedback">
+                            Type a valid Username
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="card-subhead-text">E-mail</label>
+                        <input type="email" class="form-control" name="email" id="email" placeholder="Email" maxlength="254" value="{{email}}" required>
+                        <div class="invalid-feedback">
+                            Type a valid Email
+                        </div>
+                    </div>
+
+                    <div class="row my-0">
+                        <div class="col-6 form-group">
+                            <label for="fname" class="card-subhead-text">First Name</label>
+                            <input type="text" class="form-control" name="first_name" id="fname" placeholder="Enter name" maxlength="300" value="{{fname}}" required>
+                            <div class="invalid-feedback">
+                                Type your First Name
+                            </div>
+                        </div>
+                        <div class="col-6 form-group">
+                            <label for="lname" class="card-subhead-text">Last Name</label>
+                            <input type="text" class="form-control" name="last_name" id="lname" placeholder="Last name" maxlength="300" value="{{lname}}" required>
+                            <div class="invalid-feedback">
+                                Type your Last Name
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password1" class="card-subhead-text">Password</label>
+                        <input type="password" class="form-control"  name="password1" id="password1" placeholder="Password" maxlength="300" required>
+                        <div id="passwordHelpBlock" class="form-text">
+                            Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.
+                        </div>
+                        <div class="invalid-feedback">
+                            Type your Password
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password2" class="card-subhead-text">Confirm Password</label>
+                        <input type="password" class="form-control"  name="password2" id="password2" placeholder="Type your password again" maxlength="300" required>
+                        <div class="invalid-feedback">
+                            Type Password again
+                        </div>
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary btn-main btn-stretch mt-3">
+			            <div class="spinner-border spinner spinner-border-sm text-light" role="status" style="display: none;">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        Continue
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+
+                </form>
+
+                <div class="text-center mt-3">Already have an account? <a class="text-primary" href="{% url 'users:login' %}">Login</a></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block extra_body %}
+<script async src="{% static "js/tkd_script.js" %}"></script>
+{% endblock %}
